@@ -1,0 +1,15 @@
+{% include 'tweets/bootstrapTemp.html' %}
+
+<div class="cc container my-4">
+    <div class="row">
+        <div class="col-sm-3 border border-primary p-md-4 p-sm-0 my-4 h-100 sticky-top">
+            <h4 class="customy text-uppercase text-center">
+                {% block user %}{% endblock %}
+            </h4>
+        </div>
+
+        <div class="offset-sm-1 col-sm-8">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
