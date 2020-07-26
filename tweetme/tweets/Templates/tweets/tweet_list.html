@@ -1,0 +1,399 @@
+{% extends 'tweets/base.html' %}
+<!-- {% include 'tweets/bootstrap.html' %} -->
+{% block title %}All Tweet{% endblock %}
+{% block user %}
+{{ user.get_username }}
+<br>
+<br>
+<h4 class="text-primary lead font-weight-bold">
+    People You may like to Follow
+</h4>
+<br>
+{% for recom in recommended %}
+<a href="{% url 'profiles:UserDetail' recom.userprofile %}" class="text-uppercase">{{recom}}</a>
+<br>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+{% if not request.GET.q %}
+
+{% include 'tweets/baseForm.html' with form=form action_url=create_url id="CreateForm"%}
+
+{% endif %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 text-center bg-primary text-uppercase font-weight-bold mb-4">
+            Tweets From Your Followers
+        </div>
+    </div>
+</div>
+<div id="api">
+
+</div>
+<div class="modal fade" id="replymodel" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form action="" id="replyform" class="form">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="replytextarea">Reply-content</label>
+                    <textarea name="content" id="replytextarea" cols="60" rows="5">
+                    </textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Reply</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<!-- {% for i in object_list %}
+{{i.content}}
+<br>
+<div class="text-primary">Posted By:&nbsp;{{i.user}}&nbsp;{{i.created|timesince}}&nbsp;ago,
+    <a class="border-bottom border=primary mx-2" href="{% url 'tweets:Detail' i.pk %}">view</a><a
+        class="border-bottom border=primary mx-2" href="{{i.get_update_url}}">update</a>
+    <a class="border-bottom border=primary mx-2" href="{% url 'tweets:Detail' i.pk %}">delete</a>
+</div>
+<hr>
+{% empty %}
+<p class="lead text-uppercase">
+    No Tweets Found
+</p>
+{% endfor %} -->
+
+<script>
+    function prependData(value) {
+        if (value.parent && value.is_retweet) {
+            var l = value.id;
+            // console.log(typel);
+            $("#api").prepend("<h5>Retweeted by : " + value.user.username + " " + value.timesince +
+                " </h5>" + "<p class='custom'>" +
+                value.parent.content + "</p>" +
+                "<p>" + "Posted by: " +
+                "<a class='mr-2' href='" + value.parent.user.url + "'>" + value.parent.user
+                .username +
+                "</a>" +
+                ", " + value.parent.timesince +
+                "</p>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                " Update</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                " Delete</a>" +
+                "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                " Retweet</a>" +
+                " <hr> ")
+        }
+    }
+    $(document.body).on('click', '.retweetbtn', function (e) { //dyamic selectors created by jquery
+        e.preventDefault();
+        console.log("Yes...");
+        $.ajax({
+            url: $(this).attr("href"),
+            method: "GET",
+            success: function (data) {
+                console.log(data);
+                // $('#api').empty();
+                prependData(data);
+            },
+            error: function (data) {
+                console.log("err");
+                console.log(data);
+            }
+        });
+    });
+
+    $(document.body).on('click', ".likebtn", function (e) {
+        e.preventDefault();
+        var element = $(this)
+        $.ajax({
+            url: element.attr("href"),
+            method: "GET",
+            success: function (data) {
+                console.log(data);
+                if (data) {
+                    var l = element.text()
+                    console.log(element);
+                    element.text("Liked")
+                } else {
+                    element.text("like")
+                }
+            },
+            error: function (data) {
+                console.log("error");
+                console.log(data);
+
+            }
+        });
+    });
+
+    function hashlinks() {
+        $(".custom").each(function () {
+            var val = $(this).html()
+            var hastagregex = /(^|\s)#([\w\d-]+)/g
+            var useregex = /(^|\s)@([\w\d-]+)/g
+            var newtext = val.replace(hastagregex, "$1<a href='/tags/$2/'>#$2</a>")
+            newtext = newtext.replace(useregex, "$1@<a href='profiles/$2/'>$2</a>")
+            $(this).html(newtext);
+            // console.log(val);
+            // console.log("Hello");
+        });
+    }
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    var check = getParameterByName("q");
+    // console.log("dfghjkjhgfdfghjklkjhgfdfghjk");
+    // console.log(check);
+
+    function parseTweets(tweets) {
+        if (tweets.length == 0) {
+            $("#api").append("<p>No Tweets Found</p>")
+        } else {
+            $.each(tweets, function (key, value) {
+                // console.log(key);
+                // console.log(value.user.username);
+                // console.log(value.content);
+                // console.log(value.id);
+                console.log(value.is_liked);
+                if (value.is_liked) {
+                    var verb = "Unlike"
+                } else {
+                    var verb = "like"
+                }
+                if (value.parent && value.is_retweet && !value.is_reply) {
+                    var l = value.id;
+                    // console.log(typel);
+                    $("#api").append("<h5>Retweeted by : " + value.user.username + " " + value.timesince +
+                        " </h5>" + "<p class='custom'>" +
+                        value.parent.content + "</p>" +
+                        "<p>" + "Posted by: " +
+                        "<a class='mr-2' href='" + value.parent.user.url + "'>" + value.parent.user
+                        .username +
+                        "</a>" +
+                        ", " + value.parent.timesince +
+                        "</p>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                        " Update</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        " Delete</a>" +
+                        "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                        " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
+                        "/like/" + "'>" + verb + "(" + value.likecount + ")" +
+                        " </a>" + "<a class='replybtn mx-2' href=''data-parent-username='" + value.parent
+                        .user.username + "'data-parent-id='" + value
+                        .parent.id +
+                        "'>" + " Reply</a>" +
+                        "<hr>")
+                } else if (value.parent && value.is_reply) {
+
+                    $("#api").append("<h5>Replied by : " + value.user.username + " " + value.timesince +
+                        " </h5>" + "<p class='custom'>" +
+                        value.content + "</p>" +
+                        "<p class='border-bottom border-secondary w-50'></p>" +
+                        "<p>" + "Posted by: " +
+                        "<a class='mr-2' href='" + value.parent.user.url + "'>" + value.parent.user
+                        .username +
+                        "</a>" + "<p class='custom'>" +
+                        value.parent.content + "</p>" +
+                        ", " + value.parent.timesince +
+                        "</p>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                        " Update</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        " Delete</a>" +
+                        "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                        " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
+                        "/like/" + "'>" + verb + "(" + value.likecount + ")" +
+                        " </a>" + "<a class='replybtn mx-2' href='' data-parent-username='" + value.parent
+                        .user.username + "'data-parent-id='" + value
+                        .parent.id +
+                        "'>" + " Reply</a>" +
+                        " <hr> ")
+
+                } else {
+                    var l = value.id;
+                    // console.log(typel);
+                    $("#api").append("<p class='custom'>" +
+                        value.content + "</p>" +
+                        "<p>" + "Posted by: " +
+                        "<a class='mr-2' href='" + value.user.url + "'>" + value.user.username +
+                        "</a>" +
+                        ", " + value.timesince +
+                        "</p>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                        " Update</a>" +
+                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        " Delete</a>" +
+                        "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                        " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
+                        "/like/" + "'>" + verb + "(" + value.likecount + ")" +
+                        " </a>" + "<a class='replybtn mx-2' href='' data-parent-username='" + value
+                        .user.username + "'data-parent-id='" + value.id +
+                        "'>" + " Reply</a>" +
+                        " <hr>")
+                }
+            });
+        }
+    }
+    $(document).ready(function () {
+        $(document.body).on('click', '.replybtn', function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-parent-id");
+            // console.log(id);
+            var parentname = $(this).attr("data-parent-username");
+            // console.log(parentname);
+            $(".modal-body #replytextarea").after("<input type='hidden' name='parent_id' value='" +
+                id + "'>" + "<input type='hidden' name='is_reply' value='" +
+                true + "'>");
+            $(".modal-body #replytextarea").text("@" + parentname + " ");
+            $("#replymodel").modal({})
+            $('#replymodel').on('shown.bs.modal', function () {
+                $('.modal-body #replytextarea').focus();
+            })
+        });
+
+        function fetchingTweets() {
+            $.ajax({
+                url: "{% url 'api:ListApi' %}",
+                method: "GET",
+                data: {
+                    "q": check,
+                },
+                success: function (data) {
+                    // console.log(data);
+                    console.log("came....")
+                    parseTweets(data)
+                    hashlinks();
+                },
+                error: function (data) {
+                    console.log("Error");
+                    console.log(data);
+                }
+
+            });
+        }
+        console.log("CAme inside again and again");
+        fetchingTweets();
+        $("#CreateForm").on('submit', function (event) {
+            event.preventDefault();
+            var formdata = $(this).serialize();
+            console.log(formdata);
+            $.ajax({
+                url: "api/create/",
+                method: "POST",
+                data: formdata,
+                success: function (data) {
+                    console.log(data);
+                    //this create data and it return (single object we can prepend this to already ecisting div)
+                    $('#CreateForm')[0].reset();
+                    $('#api').empty(); //worst method....use prepend
+                    fetchingTweets(); //worst method....use prepend
+                    //instead fetching the tweets we can use the json which coming after 
+                    //create and use prepend to the div by this way no call again to restapi
+                    hashlinks();
+                },
+                error: function (data) {
+                    console.log("error");
+                    console.log(data);
+                }
+            });
+            // $("#CreateForm").hide();
+            // console.log(a);
+            // console.log("Made stopped");
+        });
+        $("#replyform").on('submit', function (event) {
+            event.preventDefault();
+            var formdata = $(this).serialize();
+            console.log(formdata);
+            // console.log("Hi hello vanakkam......");
+            $.ajax({
+                url: "api/create/",
+                method: "POST",
+                data: formdata,
+                beforeSend: function () {
+                    $("#replymodel").modal("hide");
+                },
+                success: function (data) {
+                    console.log(data);
+                    //this create data and it return (single object we can prepend this to already ecisting div)
+                    $('#api').empty(); //worst method....use prepend
+                    fetchingTweets(); //worst method....use prepend
+                    //instead fetching the tweets we can use the json which coming after
+                    //create and use prepend to the div by this way no call again to restapi
+                    hashlinks();
+                },
+                error: function (data) {
+                    console.log("error");
+                    console.log(data);
+                }
+            });
+            // $("#CreateForm").hide();
+            // console.log(a);
+            // console.log("Made stopped");
+        });
+        // console.log("Its working");
+        $("#id_content").on("keydown", function (event) {
+            if (event.keyCode == 8) {
+                var s = $("#countchar").text();
+                $("#countchar").text(parseInt(s) + 1);
+            }
+            if (event.keyCode == 46) {
+                var s = $("#countchar").text();
+                $("#countchar").text(parseInt(s) + 1);
+            }
+            var a = $("#id_content").val().length;
+            // console.log(a);
+            var b = 140;
+            // console.log(b);
+            var final = parseInt(b) - parseInt(a);
+            // console.log(final);
+            if (parseInt(final) < 0) {
+                // event.preventDefault(); 
+                //it will not allow any keys even f5 so dont use this //wont work with keyup coz dont have any defaultBehaviour
+                this.value = this.value.substring(0, 140);
+                // $("#countchar").text(final);
+            } else {
+                $("#countchar").text(final);
+            }
+        })
+        var timercount;
+        var interval = 2000; //800ms
+        var searchQuery = $("#searchform").val();
+        $("#searchform").on("keyup", function () {
+            console.log("a");
+            setTimeout(donetyping, interval);
+        });
+
+        function donetyping() {
+            var searchQuery = $("#searchform").val();
+            console.log(searchQuery);
+            var url = "?q=" + searchQuery;
+            document.location.href = url;
+            console.log("Came to Done typing...")
+        }
+    })
+</script>
+{% endblock %}
