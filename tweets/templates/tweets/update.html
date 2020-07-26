@@ -1,0 +1,27 @@
+{%load crispy_forms_tags %}
+{% include 'tweets/bootstrapTemp.html'%}
+
+<head>
+    <style>
+        .help-block {
+            color: red;
+            margin: 16px !important;
+        }
+    </style>
+</head>
+{% block content %}
+<div class="container text-center">
+
+    <h5 class="text-primary my-4">{% block title %}Update Tweet{% endblock %}
+        </h3>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{form|crispy}}
+            <!-- {% if form.errors.content %}
+            <div class="text-light bg-danger d-inline-block font-weight-bold">{{form.errors.content}}</div>
+            <br>
+            {% endif %} -->
+            <input type="submit" class="button btn btn-primary btn-default my-4" value="Tweet">
+        </form>
+</div>
+{% endblock %}
