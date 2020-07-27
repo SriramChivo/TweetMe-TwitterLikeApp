@@ -35,7 +35,65 @@
 
 <script>
     function prependData(tweets) {
+        console.log(tweets)
+        console.log(tweets.length)
+        if (tweets.length == 1) {
+            value = tweets[0];
+            console.log("value");
+            // console.log(value.user.url);
+            // console.log(value.user.username);
+            var l = value.id;
+            // console.log(typel);
+            $("#api").prepend("Posted by: " +
+                "<a class='mr-2' href='" + value.user.url + "'>" + value.user
+                .username +
+                "</a>" + "<p class='custom'>" +
+                value.content + "</p>" +
+                " " + value.timesince +
+                "</p>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                " Update</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                " Delete</a>" +
+                "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                " Retweet</a>" + "<a class='replybtn mx-2' href='' data-parent-username='" + value
+                .user.username + "' data-parent-id='" + value.id +
+                "'>" + " Reply</a>" +
+                " <hr > ")
+            return ""
+        } else if (typeof (tweets.length) == "undefined") {
+            value = tweets;
+            var l = value.id;
+            // console.log(typel);
+            if (value.is_liked) {
+                var verb = "Unlike"
+            } else {
+                var verb = "like"
+            }
+            $("#api").prepend("<h5>Retweeted by : " + value.user.username + " " + value.timesince +
+                " </h5>" + "<p class='custom'>" +
+                value.parent.content + "</p>" +
+                "<p>" + "Posted by: " +
+                "<a class='mr-2' href='" + value.parent.user.url + "'>" + value.parent.user
+                .username +
+                "</a>" +
+                ", " + value.parent.timesince +
+                "</p>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
+                " Update</a>" +
+                "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                " Delete</a>" +
+                "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
+                " Retweet</a>" + "<a class='replybtn mx-2' href='' data-parent-username='" + value
+                .user.username + "' data-parent-id='" + value.id +
+                "'>" + " Reply</a>" +
+                " <hr > ")
+            return ""
+        }
         $.each(tweets, function (key, value) {
+            console.log(value);
             if (value.parent && value.is_retweet && !value.is_reply) {
                 var l = value.id;
                 // console.log(typel);
@@ -211,22 +269,22 @@
         });
     });
 
-    // $(document.body).on('click', '.retweetbtn', function (e) { //dyamic selectors created by jquery
-    //     e.preventDefault();
-    //     console.log("Yes...");
-    //     $.ajax({
-    //         url: $(this).attr("href"),
-    //         method: "GET",
-    //         success: function (data) {
-    //             console.log(data);
-    //             // $('#api').empty();
-    //             prependData(data);
-    //         },
-    //         error: function (data) {
-    //             console.log("err");
-    //             console.log(data);
-    //         }
-    //     });
-    // });
+    $(document.body).on('click', '.retweetbtn', function (e) { //dyamic selectors created by jquery
+        e.preventDefault();
+        console.log("Yes...");
+        $.ajax({
+            url: $(this).attr("href"),
+            method: "GET",
+            success: function (data) {
+                console.log(data);
+                // $('#api').empty();
+                prependData(data);
+            },
+            error: function (data) {
+                console.log("err");
+                console.log(data);
+            }
+        });
+    });
 </script>
 {% endblock %}

@@ -52,8 +52,8 @@ def TweetReceiver(sender, instance, created, *args, **kwargs):
     if created:
         regex = r'#(?P<user>\w+)'
         taglist = re.findall(regex, instance.content)
-        print(taglist)
-        print(instance.__class__)  # <class 'tweets.models.Tweet'>
+        # print(taglist)
+        # print(instance.__class__)  # <class 'tweets.models.Tweet'>
         tag_dynamic.send(sender=instance.__class__, hash_dynamics=taglist)
 
 

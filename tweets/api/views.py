@@ -13,6 +13,14 @@ from tags.models import Tags
 User = get_user_model()
 
 
+class mytweets(ListAPIView):
+    serializer_class = TweetSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        qs = Tweet.objects.filter(user=self.request.user)
+        return qs
+
+
 class hashtagsApi(ListAPIView):
     serializer_class = TweetSerializer
 
@@ -20,7 +28,7 @@ class hashtagsApi(ListAPIView):
         org = self.kwargs["tags"]
         print(org)
         kw = self.request.GET.get("q", None)
-        if kw is not None and kw!="":
+        if kw is not None and kw != "":
             qs = Tweet.objects.filter(content__icontains=kw)
         else:
             qs = Tweet.objects.filter(content__icontains="#"+str(org))
@@ -44,12 +52,7 @@ class ProfileAPI(ListAPIView):
         return qs
 
 
-class LikeApi(ListAPIView):
-
-    def get_serializer_context(self, *args, **kwargs):
-        context = super(LikeApi, self).get_serializer_context(*args, **kwargs)
-        context["request"] = self.request
-        return context
+class LikeApi(APIView):
 
     def get(self, request, *args, **kwargs):
         getTweet = get_object_or_404(Tweet, id=self.kwargs["id"])
@@ -72,22 +75,40 @@ class RetweetAPI(APIView):
     def get(self, request, *args, **kwargs):
         id = self.kwargs["id"]
         et = Tweet.objects.get(id=id)
-        # print(et)
-        # print(et.parent)
+        print(et)
+        print(et.parent)
         if et.parent:
             return Response("Not Allowed", status=400)
         else:
-            et.parent = et
-            et.save()
+            # et.parent = et
+            # et.save()
             newtweet = Tweet.objects.create(
                 parent=et, user=request.user, content=et.content)
-            ser = TweetSerializer(newtweet).data
+            ser = TweetSerializer(
+                newtweet, context={"request": self.request}).data
+            # we need to pass context manually here get_serializer_context() wont work becausewe are calling the serializers manually
+            # get_serializer_context() will be called get_serialize_class() only not through get,post,put,delete manual https
+            # 93 line will work because we are using to retreive tweets with drf method only not by manual so after qs drf will call both
+            # get_serializer_class() and get_serializer_context() both automatically.
+
         return Response(ser)
 
 
 class ListTweetApi(ListAPIView):
+
     serializer_class = TweetSerializer
     # queryset = Tweet.objects.all()
+    # if we want request alone no need to use get_serializer_context()instead we can use self.context.get("request") automatically
+    # because already get_serializer_context() called whe get_serializer_class() called with context "request"
+
+    def get_serializer_context(self, *args, **kwargs):
+        # print("inside context")
+        context = super(ListTweetApi, self).get_serializer_context(
+            *args, **kwargs)
+        context["request"] = self.request
+        # print("dfghjkl")
+        # print(context)
+        return context
 
     def get_queryset(self, *args, **kwargs):
         # print(self.request.GET)
@@ -114,7 +135,7 @@ class ListTweetApi(ListAPIView):
             # print(following)
             # following = following.values_list("username", flat=True)
             qs2 = Tweet.objects.filter(user=self.request.user)
-            qs1 = Tweet.objects.filter(user__username__in=following)
+            qs1 = Tweet.objects.filter(user__in=following)
             qs = (qs2 | qs1).distinct().order_by("-created")
             # qs = Tweet.objects.all()
         return qs
@@ -126,7 +147,7 @@ class CreateTweet(CreateAPIView):
     # permission_classes = [IsAuthenticated, ]
 
     def perform_create(self, serializer):
-        print(self.request.user)
+        # print(self.request.user)
         serializer.save(user=self.request.user)
 
 

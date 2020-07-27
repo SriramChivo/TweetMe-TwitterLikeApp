@@ -82,7 +82,7 @@ class updateTweet(ownerOrNot, UpdateView):
     template_name = "tweets/update.html"
 
 
-class TweetDelete(DeleteView):
+class TweetDelete(ownerOrNot, DeleteView):
     model = Tweet
     pk_url_kwarg = "del"
     success_url = reverse_lazy("tweets:list-rest")

@@ -67,8 +67,9 @@ class TweetSerializer(serializers.ModelSerializer):
 
     def get_is_liked(self, obj):
         request = self.context.get("request")
+        print(request)
         user = request.user
-        # print(user)
+        print(user)
         # print(obj.likes.all())
         if user in obj.likes.all():
             return True

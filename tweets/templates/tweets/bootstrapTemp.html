@@ -25,16 +25,21 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="">Home</a>
                 </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li> -->
-
+                <li class="nav-item">
+                    <a id="mytweets" class="nav-link" href="{% url 'tweets:mytweets' %}">MyTweets</a>
+                </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0" action="{% url 'tweets:search' %}">
+            <form class="form-inline my-2 my-lg-0 ml-auto" action="{% url 'tweets:search' %}">
                 <input class="form-control mr-sm-2" type="search" name="q" id="searchform" value="{{request.GET.q}}"
                     placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    Hello {{user.get_username}}, &nbsp; <a class="text-danger text-underline"
+                        href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
+            </ul>
         </div>
     </nav>
     <!-- Optional JavaScript -->
