@@ -242,7 +242,7 @@
             var hastagregex = /(^|\s)#([\w\d-]+)/g
             var useregex = /(^|\s)@([\w\d-]+)/g
             var newtext = val.replace(hastagregex, "$1<a href='/tags/$2/'>#$2</a>")
-            newtext = newtext.replace(useregex, "$1@<a href='profiles/$2/'>$2</a>")
+            newtext = newtext.replace(useregex, "$1@<a href='/profiles/$2/'>$2</a>")
             $(this).html(newtext);
             // console.log(val);
             // console.log("Hello");
@@ -368,6 +368,19 @@
             });
         }
     }
+
+    function hashlinks() {
+        $(".custom").each(function () {
+            var val = $(this).html()
+            var hastagregex = /(^|\s)#([\w\d-]+)/g
+            var useregex = /(^|\s)@([\w\d-]+)/g
+            var newtext = val.replace(hastagregex, "$1<a href='/tags/$2/'>#$2</a>")
+            newtext = newtext.replace(useregex, "$1@<a href='/profiles/$2/'>$2</a>")
+            $(this).html(newtext);
+            // console.log(val);
+            // console.log("Hello");
+        });
+    }
     $(document.body).on('click', '.replybtn', function (e) {
         e.preventDefault();
         var id = $(this).attr("data-parent-id");
@@ -405,6 +418,7 @@
             });
         }
         fetchingTweets();
+
         $("#replyform").on('submit', function (event) {
             event.preventDefault();
             var formdata = $(this).serialize();

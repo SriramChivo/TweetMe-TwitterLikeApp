@@ -13,6 +13,17 @@ from tags.models import Tags
 User = get_user_model()
 
 
+class DeleteOrUpdate(APIView):
+    def get(self, *args, **kwargs):
+        kw = self.kwargs.get("id", None)
+        getobj = Tweet.objects.get(id=kw)
+        if(getobj.user == self.request.user):
+            getobj.delete()
+            return Response({"Message": "Deleted"}, status=200)
+        else:
+            return Response({"Message": "Not a Owner to delete this post"})
+
+
 class mytweets(ListAPIView):
     serializer_class = TweetSerializer
 

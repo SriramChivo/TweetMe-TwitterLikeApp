@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from .views import ListTweetApi, CreateTweet, RetweetAPI, LikeApi, ProfileAPI, RetreiveTweet, hashtagsApi,mytweets
+from .views import ListTweetApi, CreateTweet, RetweetAPI, LikeApi, ProfileAPI, RetreiveTweet, hashtagsApi, mytweets, DeleteOrUpdate
 
 app_name = 'api'
 
@@ -12,6 +12,8 @@ urlpatterns = [
     path("list/view/", ProfileAPI.as_view(), name="listview"),
     re_path(r"^(?P<id>\d+)/retweet/$",
             RetweetAPI.as_view(), name="retweetapi"),
+    re_path(r"^(?P<id>\d+)/delete/$",
+            DeleteOrUpdate.as_view(), name="deleteapi"),
     re_path(r"^tags/(?P<tags>\w+)/$",
             hashtagsApi.as_view(), name="hashtagsApi"),
     re_path(r"^(?P<id>\d+)/like/$",

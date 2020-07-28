@@ -18,7 +18,11 @@ class Tags(models.Model):
 def tagReceiver(sender, hash_dynamics, *args, **kwargs):
     if hash_dynamics:
         for hash in hash_dynamics:
-            Tags.objects.create(tags=hash)
+            getobj = Tags.objects.get(tags=hash)
+            if getobj:
+                pass
+            else:
+                Tags.objects.create(tags=hash)
 
 
 tag_dynamic.connect(tagReceiver)

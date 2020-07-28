@@ -89,7 +89,7 @@
                 "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
                 "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
                 " Update</a>" +
-                "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                "<a class='delete mx-2' href='" + "/api/" + value.id + "/delete/" + "'>" +
                 " Delete</a>" +
                 "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
                 " Retweet</a>" +
@@ -113,6 +113,7 @@
             }
         });
     });
+
 
     $(document.body).on('click', ".likebtn", function (e) {
         e.preventDefault();
@@ -144,7 +145,7 @@
             var hastagregex = /(^|\s)#([\w\d-]+)/g
             var useregex = /(^|\s)@([\w\d-]+)/g
             var newtext = val.replace(hastagregex, "$1<a href='/tags/$2/'>#$2</a>")
-            newtext = newtext.replace(useregex, "$1@<a href='profiles/$2/'>$2</a>")
+            newtext = newtext.replace(useregex, "$1@<a href='/profiles/$2/'>$2</a>")
             $(this).html(newtext);
             // console.log(val);
             // console.log("Hello");
@@ -195,7 +196,7 @@
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
                         " Update</a>" +
-                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        "<a class='delete mx-2' href='" + "/api/" + value.id + "/delete/" + "'>" +
                         " Delete</a>" +
                         "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
                         " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
@@ -221,7 +222,7 @@
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
                         " Update</a>" +
-                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        "<a class='delete mx-2' href='" + "/api/" + value.id + "/delete/" + "'>" +
                         " Delete</a>" +
                         "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
                         " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
@@ -245,7 +246,7 @@
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/" + "'>" + " View</a>" +
                         "<a class='mx-2' href='" + "/tweets/" + value.id + "/update/" + "'>" +
                         " Update</a>" +
-                        "<a class='mx-2' href='" + "/tweets/" + value.id + "/delete/" + "'>" +
+                        "<a class='delete mx-2' href='" + "/api/" + value.id + "/delete/" + "'>" +
                         " Delete</a>" +
                         "<a class='retweetbtn mx-2' href='" + "/api/" + value.id + "/retweet/" + "'>" +
                         " Retweet</a>" + "<a class='likebtn mx-2' href='" + "/api/" + value.id +
@@ -275,6 +276,7 @@
             })
         });
 
+
         function fetchingTweets() {
             $.ajax({
                 url: "{% url 'api:ListApi' %}",
@@ -297,6 +299,34 @@
         }
         console.log("CAme inside again and again");
         fetchingTweets();
+        $(document.body).on('click', '.delete', function (e) { //dyamic selectors created by jquery
+            e.preventDefault();
+            alert("Are you sure to delete this tweet");
+            console.log(" in Delete...");
+            $.ajax({
+                url: $(this).attr("href"),
+                method: "GET",
+                success: function (data) {
+                    console.log(data);
+                    if (data["Message"] == "Deleted") {
+                        console.log("Deleted")
+                        $("#api").empty();
+                        fetchingTweets();
+                        hashlinks();
+                    } else {
+                        // console.log(data["Message"])
+                        // console.log(data.Message)
+                        alert(data["Message"])
+                    }
+                    // $('#api').empty();
+                },
+                error: function (data) {
+                    console.log("err");
+                    console.log(data);
+                    // alert(data.message)
+                }
+            });
+        });
         $("#CreateForm").on('submit', function (event) {
             event.preventDefault();
             var formdata = $(this).serialize();

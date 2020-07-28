@@ -36,7 +36,7 @@
             </form>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    Hello {{user.get_username}}, &nbsp; <a class="text-danger text-underline"
+                    Hello {{request.user.username}}, &nbsp; <a class="text-danger text-underline"
                         href="{% url 'accounts:logout' %}">Logout</a>
                 </li>
             </ul>

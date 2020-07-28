@@ -23,8 +23,15 @@ class loginTweet(FormView):
         username = form.cleaned_data.get("username")
         password = form.cleaned_data.get("password")
         auth = authenticate(username=username, password=password)
-        login(self.request, auth)
-        return HttpResponseRedirect(reverse("tweets:list-rest"))
+        print(auth)
+        if auth:
+            login(self.request, auth)
+            return HttpResponseRedirect(reverse("tweets:list-rest"))
+        else:
+            print("Unauthenticate")
+            form = loginForm()
+            message = "Username or Password is Incorrect"
+            return render(self.request, self.template_name, context={"message": message, "form": form})
 
 
 class registration(CreateView):

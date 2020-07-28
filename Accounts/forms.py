@@ -16,10 +16,10 @@ class tweetUserForm(UserCreationForm):
     last_name = forms.CharField(
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
-    password1 = forms.CharField(
+    password1 = forms.CharField(label="Password",
         widget=forms.PasswordInput(attrs={"class": "form-control"})
     )
-    password2 = forms.CharField(
+    password2 = forms.CharField(label="Confirm Password",
         widget=forms.PasswordInput(attrs={"class": "form-control"})
     )
 
